@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Timesheet Management App
 
-## Getting Started
+A modern, SaaS-style **Timesheet Management Application** built with Next.js 14+ (App Router), TypeScript, and Tailwind CSS. It features secure authentication, a clean dashboard, and full CRUD functionality for managing weekly timesheet entries.
 
-First, run the development server:
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Authentication
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Clean login screen with email and password
+- Dummy authentication using **NextAuth.js** (Credentials provider)
+- Secure session management with JWT
+- Protected routes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Dashboard
 
-## Learn More
+- Responsive table displaying timesheet entries
+- Columns: **Week #**, **Date**, **Status**, **Actions**
+- View, Add, and Edit timesheet entries via modals
+- Form validation using React Hook Form + Zod (or native validation)
+- Loading states and error handling
+- Responsive design (mobile-friendly)
 
-To learn more about Next.js, take a look at the following resources:
+### Technical Highlights
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- All client-side API calls go through internal Next.js API routes (`/api/*`)
+- Mock data served through dedicated API endpoints
+- Reusable, modular, and clean component structure
+- Type-safe throughout with TypeScript
+- Basic unit and component tests
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠 Tech Stack
 
-## Deploy on Vercel
+- **Framework**: Next.js 14+ (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Authentication**: NextAuth.js (v5)
+- **Forms & Validation**: React Hook Form + Zod (recommended)
+- **UI Components**: Headless UI / custom Tailwind components
+- **State Management**: React hooks + server components where possible
+- **Testing**: Jest + React Testing Library (basic setup)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🚀 Getting Started
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Prerequisites
+
+- Node.js 20+
+- npm / yarn / pnpm
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone <your-repo-url>
+   cd timesheet-management-app
+   ```

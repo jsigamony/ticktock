@@ -2,7 +2,6 @@ import type { NextRequest } from "next/server";
 import { mockTimesheets, mockTimesheetEntries } from "@/lib/mockData";
 import type { Timesheet, TimesheetEntry } from "@/types";
 
-// In-memory mutable copies — POST can append without touching the source file
 const timesheets: Timesheet[] = [...mockTimesheets];
 const entries: TimesheetEntry[] = [...mockTimesheetEntries];
 
@@ -23,12 +22,12 @@ export async function GET(request: NextRequest): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const body = await request.json() as Partial<Timesheet>;
+  const body = (await request.json()) as Partial<Timesheet>;
 
   if (!body.userId || !body.weekStart || !body.weekEnd) {
     return Response.json(
       { error: "userId, weekStart, and weekEnd are required" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -38,7 +37,7 @@ export async function POST(request: Request): Promise<Response> {
     weekStart: body.weekStart,
     weekEnd: body.weekEnd,
     totalHours: body.totalHours ?? 0,
-    status: "draft",
+    status: "missing",
   };
 
   timesheets.push(newTimesheet);

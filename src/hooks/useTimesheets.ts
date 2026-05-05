@@ -14,7 +14,9 @@ interface UseTimesheetsResult {
   refetch: () => void;
 }
 
-export function useTimesheets({ userId }: UseTimesheetsOptions = {}): UseTimesheetsResult {
+export function useTimesheets({
+  userId,
+}: UseTimesheetsOptions = {}): UseTimesheetsResult {
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,7 @@ export function useTimesheets({ userId }: UseTimesheetsOptions = {}): UseTimeshe
 
       if (!res.ok) throw new Error(`Failed to fetch timesheets: ${res.status}`);
 
-      const data = await res.json() as Timesheet[];
+      const data = (await res.json()) as Timesheet[];
       setTimesheets(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -54,7 +56,9 @@ interface UseTimesheetEntriesResult {
   error: string | null;
 }
 
-export function useTimesheetEntries(timesheetId: string | null): UseTimesheetEntriesResult {
+export function useTimesheetEntries(
+  timesheetId: string | null,
+): UseTimesheetEntriesResult {
   const [entries, setEntries] = useState<TimesheetEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

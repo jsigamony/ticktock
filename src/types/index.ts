@@ -12,7 +12,7 @@ export interface Timesheet {
   weekStart: string;
   weekEnd: string;
   totalHours: number;
-  status: "draft" | "submitted" | "approved" | "rejected";
+  status: "completed" | "incomplete" | "missing";
 }
 
 export interface TimesheetEntry {

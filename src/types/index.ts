@@ -24,3 +24,15 @@ export interface TimesheetEntry {
   hours: number;
   description: string;
 }
+
+export interface DayGroup {
+  date: string;
+  entries: TimesheetEntry[];
+}
+
+export interface TimesheetDetailData {
+  timesheet: Timesheet;
+  days: DayGroup[];
+  loggedHours: number;
+  targetHours: number;
+}

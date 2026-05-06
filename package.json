@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "cypress:open": "node scripts/run-cypress.mjs open",
+    "cypress:run": "node scripts/run-cypress.mjs run",
+    "test:e2e": "npm run build && start-server-and-test \"next start --port 3100\" http://localhost:3100 \"node scripts/run-cypress.mjs run --config baseUrl=http://localhost:3100\""
   },
   "dependencies": {
     "next": "16.2.4",
@@ -19,8 +22,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cypress": "^14.5.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "start-server-and-test": "^3.0.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

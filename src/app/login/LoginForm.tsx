@@ -39,13 +39,10 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Changed flex to flex-col (mobile) and md:flex-row (desktop) */}
       <div className="min-h-screen flex flex-col md:flex-row">
-        {/* Form Section: full width on mobile, 1/2 on medium screens+ */}
         <div className="w-full md:w-1/2 flex items-center justify-center bg-white md:bg-gray-100 py-12 px-6">
           <div className="w-full max-w-sm">
             {" "}
-            {/* Changed w-95 to max-w-sm for better containment */}
             <h2 className="text-2xl font-semibold mb-6 text-gray-800">
               Welcome back
             </h2>
@@ -114,7 +111,6 @@ export default function LoginForm() {
           </div>
         </div>
 
-        {/* Info Panel: hidden on very small screens, or stacked at the bottom */}
         <div className="w-full md:w-1/2 bg-blue-600 flex items-center justify-center text-white p-8 md:p-12">
           <div className="max-w-md text-center md:text-left">
             <h1 className="text-3xl font-bold mb-4">ticktock</h1>

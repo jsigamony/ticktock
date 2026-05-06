@@ -1,10 +1,12 @@
-import { mockTimesheets, mockTimesheetEntries } from "@/lib/mockData";
+import {
+  addTimesheetEntry,
+  deleteTimesheetEntry,
+  getTimesheet,
+  getTimesheetEntries,
+  TARGET_HOURS,
+  updateTimesheetEntry,
+} from "@/lib/timesheetStore";
 import type { TimesheetEntry } from "@/types";
-
-const TARGET_HOURS = 40;
-
-// Module-level mutable copy so POST appends are visible to subsequent GETs
-const allEntries: TimesheetEntry[] = [...mockTimesheetEntries];
 
 export async function GET(
   _request: Request,
@@ -12,16 +14,15 @@ export async function GET(
 ): Promise<Response> {
   const { id } = await params;
 
-  const timesheet = mockTimesheets.find((ts) => ts.id === id);
+  const timesheet = getTimesheet(id);
 
   if (!timesheet) {
     return Response.json({ error: "Timesheet not found" }, { status: 404 });
   }
 
-  const entries = allEntries.filter((e) => e.timesheetId === id);
+  const entries = getTimesheetEntries(id);
   const loggedHours = entries.reduce((sum, e) => sum + e.hours, 0);
 
-  // Group entries by date, preserving chronological order
   const dayMap = new Map<string, TimesheetEntry[]>();
   entries.forEach((entry) => {
     const bucket = dayMap.get(entry.date) ?? [];
@@ -48,12 +49,12 @@ export async function POST(
 ): Promise<Response> {
   const { id } = await params;
 
-  const timesheet = mockTimesheets.find((ts) => ts.id === id);
+  const timesheet = getTimesheet(id);
   if (!timesheet) {
     return Response.json({ error: "Timesheet not found" }, { status: 404 });
   }
 
-  const body = await request.json() as {
+  const body = (await request.json()) as {
     date?: string;
     task?: string;
     project?: string;
@@ -78,8 +79,7 @@ export async function POST(
     description: body.description ?? "",
   };
 
-  allEntries.push(newEntry);
-  return Response.json(newEntry, { status: 201 });
+  return Response.json(addTimesheetEntry(newEntry), { status: 201 });
 }
 
 export async function PATCH(
@@ -88,12 +88,12 @@ export async function PATCH(
 ): Promise<Response> {
   const { id } = await params;
 
-  const timesheet = mockTimesheets.find((ts) => ts.id === id);
+  const timesheet = getTimesheet(id);
   if (!timesheet) {
     return Response.json({ error: "Timesheet not found" }, { status: 404 });
   }
 
-  const body = await request.json() as {
+  const body = (await request.json()) as {
     entryId?: string;
     date?: string;
     task?: string;
@@ -113,24 +113,18 @@ export async function PATCH(
     );
   }
 
-  const entryIndex = allEntries.findIndex(
-    (entry) => entry.id === body.entryId && entry.timesheetId === id,
-  );
-
-  if (entryIndex === -1) {
-    return Response.json({ error: "Entry not found" }, { status: 404 });
-  }
-
-  const updatedEntry: TimesheetEntry = {
-    ...allEntries[entryIndex],
+  const updatedEntry = updateTimesheetEntry(id, body.entryId, {
     date: body.date,
     task: body.task,
     project: body.project,
     hours: body.hours,
     description: body.description ?? "",
-  };
+  });
 
-  allEntries[entryIndex] = updatedEntry;
+  if (!updatedEntry) {
+    return Response.json({ error: "Entry not found" }, { status: 404 });
+  }
+
   return Response.json(updatedEntry);
 }
 
@@ -140,25 +134,21 @@ export async function DELETE(
 ): Promise<Response> {
   const { id } = await params;
 
-  const timesheet = mockTimesheets.find((ts) => ts.id === id);
+  const timesheet = getTimesheet(id);
   if (!timesheet) {
     return Response.json({ error: "Timesheet not found" }, { status: 404 });
   }
 
-  const body = await request.json() as { entryId?: string };
+  const body = (await request.json()) as { entryId?: string };
 
   if (!body.entryId) {
     return Response.json({ error: "entryId is required" }, { status: 400 });
   }
 
-  const entryIndex = allEntries.findIndex(
-    (entry) => entry.id === body.entryId && entry.timesheetId === id,
-  );
-
-  if (entryIndex === -1) {
+  const deletedEntry = deleteTimesheetEntry(id, body.entryId);
+  if (!deletedEntry) {
     return Response.json({ error: "Entry not found" }, { status: 404 });
   }
 
-  const [deletedEntry] = allEntries.splice(entryIndex, 1);
   return Response.json(deletedEntry);
 }

@@ -1,9 +1,10 @@
 import type { NextRequest } from "next/server";
-import { mockTimesheets, mockTimesheetEntries } from "@/lib/mockData";
-import type { Timesheet, TimesheetEntry } from "@/types";
-
-const timesheets: Timesheet[] = [...mockTimesheets];
-const entries: TimesheetEntry[] = [...mockTimesheetEntries];
+import {
+  addTimesheet,
+  getTimesheetEntries,
+  getTimesheets,
+} from "@/lib/timesheetStore";
+import type { Timesheet } from "@/types";
 
 export async function GET(request: NextRequest): Promise<Response> {
   const { searchParams } = request.nextUrl;
@@ -11,14 +12,14 @@ export async function GET(request: NextRequest): Promise<Response> {
   const timesheetId = searchParams.get("timesheetId");
 
   if (timesheetId) {
-    return Response.json(entries.filter((e) => e.timesheetId === timesheetId));
+    return Response.json(getTimesheetEntries(timesheetId));
   }
 
   if (userId) {
-    return Response.json(timesheets.filter((t) => t.userId === userId));
+    return Response.json(getTimesheets(userId));
   }
 
-  return Response.json(timesheets);
+  return Response.json(getTimesheets());
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -40,6 +41,5 @@ export async function POST(request: Request): Promise<Response> {
     status: "missing",
   };
 
-  timesheets.push(newTimesheet);
-  return Response.json(newTimesheet, { status: 201 });
+  return Response.json(addTimesheet(newTimesheet), { status: 201 });
 }

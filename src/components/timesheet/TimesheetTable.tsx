@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { useTimesheets } from "@/hooks/useTimesheets";
-import { formatWeekRange } from "@/lib/utils";
+import {
+  formatWeekRange,
+  getTimesheetStatus,
+  getPageNumbers,
+  formatStatus,
+  getNormalizedDateRange,
+  weekOverlapsDateRange,
+} from "@/lib/utils";
 import type { Timesheet } from "@/types";
 import TimesheetDetails from "./TimesheetDetails";
 
@@ -13,24 +20,7 @@ const STATUS_STYLES: Record<Timesheet["status"], string> = {
 };
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
-const ALL_DATE_RANGES = "all";
 const ALL_STATUSES = "all";
-
-function getPageNumbers(currentPage: number, totalPages: number) {
-  const pages = new Set([1, totalPages]);
-
-  for (let page = currentPage - 1; page <= currentPage + 1; page += 1) {
-    if (page >= 1 && page <= totalPages) {
-      pages.add(page);
-    }
-  }
-
-  return Array.from(pages).sort((a, b) => a - b);
-}
-
-function formatStatus(status: Timesheet["status"]) {
-  return status.charAt(0).toUpperCase() + status.slice(1);
-}
 
 interface TimesheetTableProps {
   userId: string;
@@ -41,43 +31,49 @@ export default function TimesheetTable({ userId }: TimesheetTableProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
-  const [dateRangeFilter, setDateRangeFilter] = useState(ALL_DATE_RANGES);
+  const [dateRangeStart, setDateRangeStart] = useState("");
+  const [dateRangeEnd, setDateRangeEnd] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     Timesheet["status"] | typeof ALL_STATUSES
   >(ALL_STATUSES);
 
-  const dateRangeOptions = useMemo(() => {
-    const ranges = new Map<string, string>();
-
-    timesheets.forEach((timesheet) => {
-      const key = `${timesheet.weekStart}|${timesheet.weekEnd}`;
-      ranges.set(key, formatWeekRange(timesheet.weekStart, timesheet.weekEnd));
-    });
-
-    return Array.from(ranges, ([value, label]) => ({ value, label }));
-  }, [timesheets]);
+  const timesheetsWithStatus = useMemo(
+    () =>
+      timesheets.map((timesheet) => ({
+        ...timesheet,
+        status: getTimesheetStatus(timesheet.totalHours),
+      })),
+    [timesheets],
+  );
 
   const statusOptions = useMemo(
-    () => Array.from(new Set(timesheets.map((timesheet) => timesheet.status))),
-    [timesheets],
+    () =>
+      Array.from(
+        new Set(timesheetsWithStatus.map((timesheet) => timesheet.status)),
+      ),
+    [timesheetsWithStatus],
+  );
+  const selectedDateRange = useMemo(
+    () => getNormalizedDateRange(dateRangeStart, dateRangeEnd),
+    [dateRangeStart, dateRangeEnd],
   );
 
   const filteredTimesheets = useMemo(
     () =>
-      timesheets.filter((timesheet) => {
+      timesheetsWithStatus.filter((timesheet) => {
         const matchesDateRange =
-          dateRangeFilter === ALL_DATE_RANGES ||
-          dateRangeFilter === `${timesheet.weekStart}|${timesheet.weekEnd}`;
+          !selectedDateRange ||
+          weekOverlapsDateRange(timesheet, selectedDateRange);
         const matchesStatus =
           statusFilter === ALL_STATUSES || statusFilter === timesheet.status;
 
         return matchesDateRange && matchesStatus;
       }),
-    [dateRangeFilter, statusFilter, timesheets],
+    [selectedDateRange, statusFilter, timesheetsWithStatus],
   );
 
   const hasActiveFilters =
-    dateRangeFilter !== ALL_DATE_RANGES || statusFilter !== ALL_STATUSES;
+    Boolean(selectedDateRange) || statusFilter !== ALL_STATUSES;
   const totalPages = Math.max(
     1,
     Math.ceil(filteredTimesheets.length / pageSize),
@@ -120,22 +116,27 @@ export default function TimesheetTable({ userId }: TimesheetTableProps) {
   return (
     <>
       <div className="flex flex-wrap items-center gap-3">
-        <select
-          value={dateRangeFilter}
+        <input
+          type="date"
+          value={dateRangeStart}
           onChange={(e) => {
-            setDateRangeFilter(e.target.value);
+            setDateRangeStart(e.target.value);
             setCurrentPage(1);
           }}
           className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-600 bg-white"
-          aria-label="Filter by date range"
-        >
-          <option value={ALL_DATE_RANGES}>All date ranges</option>
-          {dateRangeOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          aria-label="Filter start date"
+        />
+
+        <input
+          type="date"
+          value={dateRangeEnd}
+          onChange={(e) => {
+            setDateRangeEnd(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-600 bg-white"
+          aria-label="Filter end date"
+        />
 
         <select
           value={statusFilter}
@@ -159,7 +160,8 @@ export default function TimesheetTable({ userId }: TimesheetTableProps) {
         {hasActiveFilters && (
           <button
             onClick={() => {
-              setDateRangeFilter(ALL_DATE_RANGES);
+              setDateRangeStart("");
+              setDateRangeEnd("");
               setStatusFilter(ALL_STATUSES);
               setCurrentPage(1);
             }}

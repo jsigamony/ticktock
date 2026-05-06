@@ -1,25 +1,13 @@
 "use client";
 
 import { useEffect, useReducer, useState } from "react";
-import type { Timesheet, TimesheetEntry } from "@/types";
+import type { TimesheetEntry, DayGroup, TimesheetDetailData } from "@/types";
 import { formatWeekRange } from "@/lib/utils";
 import AddTimeModal from "./AddTimeModal";
 
 interface TimeSheetDetailsProps {
   timesheetId: string | null;
   onBack: () => void;
-}
-
-interface DayGroup {
-  date: string;
-  entries: TimesheetEntry[];
-}
-
-interface TimesheetDetailData {
-  timesheet: Timesheet;
-  days: DayGroup[];
-  loggedHours: number;
-  targetHours: number;
 }
 
 type FetchState =
@@ -198,11 +186,7 @@ const TaskRow = ({
         </div>
       )}
 
-      {error && (
-        <p className="mt-1 text-xs text-red-600">
-          {error}
-        </p>
-      )}
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
 
       {editOpen && (
         <AddTimeModal
